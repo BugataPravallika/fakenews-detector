@@ -1,0 +1,10 @@
+# render.yaml
+services:
+  - type: web
+    name: fake-news-detector
+    runtime: python
+    buildCommand: ""
+    startCommand: python app.py
+    envVars:
+      - key: FLASK_ENV
+        value: production
