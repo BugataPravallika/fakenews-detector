@@ -24,23 +24,21 @@ def predict():
     data = vectorizer.transform([translated_news])
     prediction = model.predict(data)[0]
 
-    # Get fact-check result
-    claim, rating = fact_check_news(translated_news)
-
-    # Save to history.json
+    # ✅ Save history
     history = {
         'news': news,
         'translated': translated_news,
         'prediction': prediction,
-        'claim': claim,
-        'rating': rating,
         'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
-
     with open('history.json', 'a', encoding='utf-8') as f:
         f.write(json.dumps(history) + "\n")
 
+    # ✅ Fact Check
+    claim, rating = fact_check_news(translated_news)
+
     return render_template('result.html', prediction=prediction, news=news, translated=translated_news, claim=claim, rating=rating)
+
 
 @app.route('/history')
 def show_history():

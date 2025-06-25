@@ -1,80 +1,27 @@
+<!-- templates/history.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Fake News Prediction History</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            padding: 20px;
-            background-color: #f9f9f9;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 8px rgba(0,0,0,0.1);
-        }
-        th, td {
-            padding: 10px 12px;
-            border: 1px solid #ddd;
-            text-align: left;
-            vertical-align: top;
-        }
-        th {
-            background-color: #007bff;
-            color: white;
-        }
-        tr:nth-child(even) {
-            background-color: #f0f8ff;
-        }
-        .back {
-            margin-top: 20px;
-            text-align: center;
-        }
-        .back a {
-            text-decoration: none;
-            color: #007bff;
-            font-weight: bold;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Prediction History</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>🧾 Prediction History</h1>
-
-    {% if entries %}
-    <table>
-        <tr>
-            <th>Original News</th>
-            <th>Translated</th>
-            <th>Prediction</th>
-            <th>Fact Check Claim</th>
-            <th>Fact Check Rating</th>
-            <th>Time</th>
-        </tr>
-        {% for item in entries %}
-        <tr>
-            <td>{{ item.news }}</td>
-            <td>{{ item.translated }}</td>
-            <td>{{ item.prediction }}</td>
-            <td>{{ item.claim }}</td>
-            <td>{{ item.rating }}</td>
-            <td>{{ item.timestamp }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    {% else %}
-    <p>No history yet. Start predicting!</p>
-    {% endif %}
-
-    <div class="back">
-        <a href="/">← Go back to Home</a>
-    </div>
+  <h1>🧾 Prediction History</h1>
+  {% if history %}
+    <ul>
+      {% for entry in history %}
+        <li>
+          <strong>News:</strong> {{ entry.news }}<br>
+          <strong>Translated:</strong> {{ entry.translated }}<br>
+          <strong>Prediction:</strong> {{ entry.prediction }}<br>
+          <small>{{ entry.timestamp }}</small>
+        </li>
+        <hr>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No history found yet.</p>
+  {% endif %}
 </body>
 </html>
