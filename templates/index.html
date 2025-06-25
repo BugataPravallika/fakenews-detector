@@ -12,9 +12,38 @@
 </head>
 <body>
     <h1>📰 Fake News Detector</h1>
-    <form action="/predict" method="POST">
-        <textarea name="news" placeholder="Paste your news article here..." required></textarea><br>
-        <button type="submit">Check News</button>
-    </form>
+    <form method="POST" action="/predict" onsubmit="showSpinner()">
+  <textarea id="news-input" name="news" rows="6" placeholder="Paste news here..." required></textarea><br><br>
+
+  <button type="submit">Predict</button>
+  <button type="button" onclick="copyExample()">📋 Copy Example News</button>
+</form>
+
+<!-- Spinner -->
+<div id="spinner" style="display:none;">
+  <p>⏳ Predicting... please wait.</p>
+</div>
+
+    <h2>📰 Latest News Headlines (click to test)</h2>
+<ul>
+  {% for article in headlines %}
+    <li>
+      <form method="POST" action="/predict">
+        <input type="hidden" name="news" value="{{ article.title }}">
+        <button type="submit">{{ article.title }}</button>
+      </form>
+    </li>
+  {% endfor %}
+</ul>
+<script>
+function copyExample() {
+  const example = "The Prime Minister announced a new economic policy today aimed at boosting local manufacturing.";
+  document.getElementById("news-input").value = example;
+}
+
+function showSpinner() {
+  document.getElementById("spinner").style.display = 'block';
+}
+</script>
 </body>
 </html>

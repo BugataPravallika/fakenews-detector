@@ -1,27 +1,58 @@
 from flask import Flask, render_template, request
+from deep_translator import GoogleTranslator
 import joblib
+from fact_check import fact_check_news
+from news_fetcher import get_live_headlines
+import json
+from datetime import datetime
+import os
 
 app = Flask(__name__)
-
-# Load model and vectorizer
 model = joblib.load('model/fake_news_model.pkl')
 vectorizer = joblib.load('model/tfidf_vectorizer.pkl')
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    headlines = get_live_headlines()
+    return render_template('index.html', headlines=headlines)
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    if request.method == 'POST':
-        news = request.form['news']
-        data = vectorizer.transform([news])
-        prediction = model.predict(data)[0]
-        return render_template('result.html', prediction=prediction, news=news)
+    news = request.form['news']
+    translated_news = GoogleTranslator(source='auto', target='en').translate(news)
+    
+    data = vectorizer.transform([translated_news])
+    prediction = model.predict(data)[0]
+
+    # Get fact-check result
+    claim, rating = fact_check_news(translated_news)
+
+    # Save to history.json
+    history = {
+        'news': news,
+        'translated': translated_news,
+        'prediction': prediction,
+        'claim': claim,
+        'rating': rating,
+        'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+
+    with open('history.json', 'a', encoding='utf-8') as f:
+        f.write(json.dumps(history) + "\n")
+
+    return render_template('result.html', prediction=prediction, news=news, translated=translated_news, claim=claim, rating=rating)
+
+@app.route('/history')
+def history():
+    if not os.path.exists('history.json'):
+        return render_template('history.html', entries=[])
+
+    with open('history.json', 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+        entries = [json.loads(line) for line in lines]
+
+    return render_template('history.html', entries=entries)
 
 if __name__ == '__main__':
-    import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
-
-

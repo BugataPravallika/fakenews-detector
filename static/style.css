@@ -29,3 +29,9 @@ button {
 button:hover {
     background-color: #2563eb;
 }
+#spinner {
+  color: darkred;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
