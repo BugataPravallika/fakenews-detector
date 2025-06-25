@@ -11,33 +11,39 @@ app = Flask(__name__)
 model = joblib.load('model/fake_news_model.pkl')
 vectorizer = joblib.load('model/tfidf_vectorizer.pkl')
 
+
 @app.route('/')
 def index():
     headlines = get_live_headlines()
     return render_template('index.html', headlines=headlines)
 
+
 @app.route('/predict', methods=['POST'])
 def predict():
-    news = request.form['news']
-    translated_news = GoogleTranslator(source='auto', target='en').translate(news)
+    try:
+        news = request.form['news']
+        translated_news = GoogleTranslator(source='auto', target='en').translate(news)
+
+        data = vectorizer.transform([translated_news])
+        prediction = model.predict(data)[0]
+
+        # ✅ Save to history.json
+        history = {
+            'news': news,
+            'translated': translated_news,
+            'prediction': prediction,
+            'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        with open('history.json', 'a', encoding='utf-8') as f:
+            f.write(json.dumps(history) + "\n")
+
+        # ✅ Fact Check
+        claim, rating = fact_check_news(translated_news)
+
+        return render_template('result.html', prediction=prediction, news=news, translated=translated_news, claim=claim, rating=rating)
     
-    data = vectorizer.transform([translated_news])
-    prediction = model.predict(data)[0]
-
-    # ✅ Save history
-    history = {
-        'news': news,
-        'translated': translated_news,
-        'prediction': prediction,
-        'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    }
-    with open('history.json', 'a', encoding='utf-8') as f:
-        f.write(json.dumps(history) + "\n")
-
-    # ✅ Fact Check
-    claim, rating = fact_check_news(translated_news)
-
-    return render_template('result.html', prediction=prediction, news=news, translated=translated_news, claim=claim, rating=rating)
+    except Exception as e:
+        return f"Error: {e}"
 
 
 @app.route('/history')
@@ -45,11 +51,11 @@ def show_history():
     try:
         with open('history.json', 'r', encoding='utf-8') as f:
             lines = f.readlines()
-            history_data = [json.loads(line.strip()) for line in lines]
+            history = [json.loads(line.strip()) for line in lines if line.strip()]
     except FileNotFoundError:
-        history_data = []
+        history = []
 
-    return render_template('history.html', history=history_data)
+    return render_template('history.html', history=history)
 
 
 if __name__ == '__main__':

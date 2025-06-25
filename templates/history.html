@@ -1,27 +1,30 @@
-<!-- templates/history.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Prediction History</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Prediction History</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <h1>🧾 Prediction History</h1>
-  {% if history %}
-    <ul>
-      {% for entry in history %}
-        <li>
-          <strong>News:</strong> {{ entry.news }}<br>
-          <strong>Translated:</strong> {{ entry.translated }}<br>
-          <strong>Prediction:</strong> {{ entry.prediction }}<br>
-          <small>{{ entry.timestamp }}</small>
-        </li>
-        <hr>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>No history found yet.</p>
-  {% endif %}
+    <h1>🧾 Prediction History</h1>
+    {% if history %}
+        <table border="1" cellpadding="8">
+            <tr>
+                <th>News</th>
+                <th>Translated</th>
+                <th>Prediction</th>
+                <th>Timestamp</th>
+            </tr>
+            {% for item in history %}
+            <tr>
+                <td>{{ item.news }}</td>
+                <td>{{ item.translated }}</td>
+                <td>{{ item.prediction }}</td>
+                <td>{{ item.timestamp }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No predictions found yet.</p>
+    {% endif %}
 </body>
 </html>
