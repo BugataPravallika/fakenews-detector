@@ -43,15 +43,16 @@ def predict():
     return render_template('result.html', prediction=prediction, news=news, translated=translated_news, claim=claim, rating=rating)
 
 @app.route('/history')
-def history():
-    if not os.path.exists('history.json'):
-        return render_template('history.html', entries=[])
+def show_history():
+    try:
+        with open('history.json', 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+            history_data = [json.loads(line.strip()) for line in lines]
+    except FileNotFoundError:
+        history_data = []
 
-    with open('history.json', 'r', encoding='utf-8') as f:
-        lines = f.readlines()
-        entries = [json.loads(line) for line in lines]
+    return render_template('history.html', history=history_data)
 
-    return render_template('history.html', entries=entries)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
